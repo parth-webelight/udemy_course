@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:roll_dice_app/widgets/custom_button.dart';
 
 class RollDiceScreen extends StatefulWidget {
   const RollDiceScreen({super.key});
@@ -53,26 +54,13 @@ class _RollDiceScreenState extends State<RollDiceScreen> {
                     width: 200,
                   ),
             const SizedBox(height: 30),
-            customButton("Roll Dice", rollDice),
+            CustomButton(title: "Roll Dice",onPressed:  rollDice),
             const SizedBox(height: 20),
-            customButton("Coin Flip", coinFlip),
+            CustomButton(title: "Coin Flip",onPressed: coinFlip),
           ],
         ),
       );
   }
-}
-
-Widget customButton(String name, VoidCallback onPressed) {
-  return TextButton(
-    style: TextButton.styleFrom(
-      padding: const EdgeInsets.all(20),
-      foregroundColor: Colors.white,
-      backgroundColor: Colors.black,
-      textStyle: const TextStyle(fontSize: 28),
-    ),
-    onPressed: onPressed,
-    child: Text(name),
-  );
 }
 
 enum WhichStateActive {

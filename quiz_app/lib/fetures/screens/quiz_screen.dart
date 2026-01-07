@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_app/fetures/widgets/custom_button.dart';
 import '../model/quiz_question.dart';
 import 'result_screen.dart';
 
@@ -49,21 +50,17 @@ class _QuizScreenState extends State<QuizScreen> {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: Colors.deepPurple,
-                  fontSize: MediaQuery.of(context).size.width * 0.045,
+                  fontSize: MediaQuery.of(context).size.width * 0.05,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 20),
               ...question.answers.map(
                 (answer) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  padding: const EdgeInsets.symmetric(vertical: 5),
                   child: SizedBox(
                     width: double.infinity,
-                    child: customeButton(
-                      () => answerQuestion(answer),
-                      answer,
-                      context,
-                    ),
+                    child: CustomButton(title: answer, onPressed: () => answerQuestion(answer)),
                   ),
                 ),
               ),
@@ -73,21 +70,4 @@ class _QuizScreenState extends State<QuizScreen> {
       ),
     );
   }
-}
-
-Widget customeButton(
-  void Function() function,
-  String text,
-  BuildContext context,
-) {
-  return ElevatedButton(
-    onPressed: function,
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.deepPurple,
-      foregroundColor: Colors.white,
-      textStyle: TextStyle(fontSize: MediaQuery.of(context).size.width * 0.04),
-      padding: EdgeInsets.all(10),
-    ),
-    child: Text(text),
-  );
 }
