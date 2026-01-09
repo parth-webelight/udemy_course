@@ -1,6 +1,5 @@
 import 'package:expense_tracker_app/features/expense/screen/expense_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,16 +24,21 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.money, size: 100, color: Colors.cyan),
+            Icon(
+              Icons.money,
+              size: 100,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             SizedBox(height: 25),
             Text(
               "Save Your Expense",
-              style: GoogleFonts.poppins(fontSize: 25, color: Colors.cyan),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
             ),
           ],
         ),
