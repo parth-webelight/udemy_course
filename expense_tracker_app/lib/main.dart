@@ -3,6 +3,13 @@ import 'package:expense_tracker_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  // WidgetsFlutterBinding.ensureInitialized();
+  // SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]).then((
+  //   fn,
+  // ) {
+  //   runApp(MyApp());
+  // });
+
   runApp(MyApp());
 }
 

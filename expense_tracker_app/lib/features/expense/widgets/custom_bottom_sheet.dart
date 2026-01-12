@@ -82,9 +82,12 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
       padding: EdgeInsets.fromLTRB(16, 48, 16, 16),
       child: Column(
         children: [
-          SizedBox(height: 10,),
-          Text("Add New Expense",style: Theme.of(context).textTheme.titleLarge,),
-          SizedBox(height: 20,),
+          SizedBox(height: 10),
+          Text(
+            "Add New Expense",
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          SizedBox(height: 20),
           TextField(
             controller: _titleController,
             maxLength: 50,
@@ -93,7 +96,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               labelText: "Title",
             ),
           ),
-          SizedBox(height: 10,),
+          SizedBox(height: 10),
           TextField(
             controller: _amountController,
             keyboardType: TextInputType.number,

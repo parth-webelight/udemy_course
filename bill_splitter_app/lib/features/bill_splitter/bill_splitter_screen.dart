@@ -112,10 +112,10 @@ class _BillSplitterScreenState extends State<BillSplitterScreen> {
                               ),
                             ),
                           );
+                          totalAmountController.clear();
+                          numberOfMemberController.clear();
+                          _formKey.currentState!.reset();
                         }
-                        totalAmountController.clear();
-                        numberOfMemberController.clear();
-                        _formKey.currentState!.reset();
                       },
                       child: const Text("Calculate"),
                     ),

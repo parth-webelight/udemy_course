@@ -27,8 +27,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     ),
   ];
 
-  
-
   void _openAddExpense() {
     showModalBottomSheet(
       isScrollControlled: true,
@@ -67,6 +65,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
         title: const Text("Track Expense"),
@@ -79,9 +78,49 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
           ),
         ],
       ),
-      body: Column(
+      body: width < 600 ?  
+      Column( 
         children: [
           Chart(expenses: _registerExpense),
+          Expanded(
+            child: _registerExpense.isNotEmpty
+                ? ListView.builder(
+                    itemCount: _registerExpense.length,
+                    itemBuilder: (context, index) => Dismissible(
+                      background: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerLeft,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      secondaryBackground: Container(
+                        color: Colors.red,
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: const Icon(Icons.delete, color: Colors.white),
+                      ),
+                      onDismissed: (direction) =>
+                          _removeExpense(_registerExpense[index]),
+                      key: ValueKey(_registerExpense[index]),
+                      child: ExpenseItem(
+                        title: _registerExpense[index].title,
+                        amount: _registerExpense[index].amount,
+                        date: _registerExpense[index].date,
+                        category: _registerExpense[index].category,
+                      ),
+                    ),
+                  )
+                : Center(
+                    child: Text(
+                      "No expenses found !",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+          ),
+        ],
+      ) : Row(
+        children: [
+          Expanded(child: Chart(expenses: _registerExpense)),
           Expanded(
             child: _registerExpense.isNotEmpty
                 ? ListView.builder(
