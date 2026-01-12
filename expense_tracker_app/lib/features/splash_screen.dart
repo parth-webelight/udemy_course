@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:expense_tracker_app/features/expense/screen/expense_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +16,6 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
     Future.delayed(Duration(seconds: 2), () {
       Navigator.pushReplacement(
-        // ignore: use_build_context_synchronously
         context,
         MaterialPageRoute(builder: (context) => ExpenseScreen()),
       );

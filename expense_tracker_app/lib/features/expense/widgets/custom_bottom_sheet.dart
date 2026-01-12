@@ -31,7 +31,7 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
     setState(() {
       _selectedDate = pickedDate;
     });
-    debugPrint("");
+    debugPrint(_selectedDate.toString());
   }
 
   void _submitData() {
@@ -87,7 +87,6 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
           SizedBox(height: 20,),
           TextField(
             controller: _titleController,
-            onChanged: (value) {},
             maxLength: 50,
             decoration: InputDecoration(
               hintText: "Enter Title",
@@ -125,7 +124,6 @@ class _CustomBottomSheetState extends State<CustomBottomSheet> {
               DropdownButton<Category>(
                 style: Theme.of(context).textTheme.bodyMedium,
                 value: _selectedCategory,
-                dropdownColor: Theme.of(context).menuTheme.style?.backgroundColor?.resolve({}),
                 items: Category.values
                     .map(
                       (e) => DropdownMenuItem<Category>(

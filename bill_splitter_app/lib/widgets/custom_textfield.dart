@@ -5,7 +5,7 @@ class CustomTextFormField extends StatelessWidget {
     super.key,
     required this.hintText,
     required this.labelText,
-    this.controller,
+    required this.controller,
     this.keyboardType = TextInputType.text,
     this.prefixIcon,
     this.obscureText = false,
@@ -40,8 +40,7 @@ class CustomTextFormField extends StatelessWidget {
         labelText: labelText,
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
         labelStyle: const TextStyle(color: Colors.black54),
-        prefixIcon:
-        prefixIcon != null ? Icon(prefixIcon, color: Colors.grey) : null,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: Colors.grey) : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
         ),

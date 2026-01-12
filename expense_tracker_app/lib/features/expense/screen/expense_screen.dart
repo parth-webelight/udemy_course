@@ -25,30 +25,6 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
       date: DateTime.now().subtract(const Duration(days: 3)),
       category: Category.travel,
     ),
-    ExpenseModel(
-      title: 'Movie Tickets',
-      amount: 25.00,
-      date: DateTime.now().subtract(const Duration(days: 5)),
-      category: Category.leisure,
-    ),
-    ExpenseModel(
-      title: 'Office Supplies',
-      amount: 120.75,
-      date: DateTime.now().subtract(const Duration(days: 7)),
-      category: Category.work,
-    ),
-    ExpenseModel(
-      title: 'Groceries',
-      amount: 95.30,
-      date: DateTime.now().subtract(const Duration(days: 2)),
-      category: Category.food,
-    ),
-    ExpenseModel(
-      title: 'Taxi Ride',
-      amount: 35.00,
-      date: DateTime.now().subtract(const Duration(days: 4)),
-      category: Category.travel,
-    ),
   ];
 
   

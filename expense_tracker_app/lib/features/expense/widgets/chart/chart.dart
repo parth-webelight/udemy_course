@@ -26,7 +26,6 @@ class Chart extends StatelessWidget {
         maxTotalExpense = bucket.totalExpense;
       }
     }
-
     return maxTotalExpense;
   }
 

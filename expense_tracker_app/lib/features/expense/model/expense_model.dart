@@ -5,12 +5,7 @@ import 'package:uuid/uuid.dart';
 final formatter = DateFormat.yMd();
 final uuid = Uuid();
 
-const categoryIcons = {
-  Category.food: Icons.lunch_dining,
-  Category.travel: Icons.flight_takeoff,
-  Category.leisure: Icons.movie,
-  Category.work: Icons.work,
-};
+
 
 class ExpenseModel {
   final String id;
@@ -52,3 +47,10 @@ class ExpenseBucket {
     return sum;
   }
 }
+
+const categoryIcons = {
+  Category.food: Icons.lunch_dining,
+  Category.travel: Icons.flight_takeoff,
+  Category.leisure: Icons.movie,
+  Category.work: Icons.work,
+};
