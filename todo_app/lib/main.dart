@@ -13,10 +13,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: "To Do App",
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-        useMaterial3: true,
-      ),
       home: const SplashScreen(),
     );
   }

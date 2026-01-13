@@ -12,6 +12,7 @@ class TodoListScreen extends StatefulWidget {
 }
 
 class _TodoListScreenState extends State<TodoListScreen> {
+
   List<TodoModel> _todos = [
   TodoModel(
     id: DateTime.now().toString(),
@@ -68,6 +69,8 @@ class _TodoListScreenState extends State<TodoListScreen> {
 
   void _editTodo(TodoModel todo, String title, String description) {
     setState(() {
+      // FIX 
+      // final _todoIndex = _todos.indexWhere((element) => element.id == todo.id,);
       _todos = _todos.map((t) {
         if (t.id == todo.id) {
           return t.copyWith(title: title, description: description);
@@ -87,7 +90,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
       }).toList();
     });
   }
-
+  
   void _showAddTodoDialog() {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -303,36 +306,45 @@ class _TodoListScreenState extends State<TodoListScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _todos.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 80,
-                    color: Colors.indigo.shade300,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "No todos yet!",
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      color: Colors.indigo.shade400,
-                      fontWeight: FontWeight.w500,
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.check_circle_outline,
+                          size: 80,
+                          color: Colors.indigo.shade300,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          "No todos yet!",
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            color: Colors.indigo.shade400,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Tap the + button to add a new todo",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.indigo.shade300,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Tap the + button to add a new todo",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      color: Colors.indigo.shade300,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             )
           : SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,7 +379,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-
                   if (_completedTodos.isNotEmpty) ...[
                     Text(
                       "Completed (${_completedTodos.length})",

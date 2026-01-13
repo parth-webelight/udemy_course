@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:meals_app/features/screens/categories_screen.dart';
+import 'package:meals_app/features/screens/tabs_screen.dart';
 import 'package:page_transition/page_transition.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
      Future.delayed(Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
-        PageTransition(type: PageTransitionType.fade, child: CategoriesScreen()),
+        PageTransition(type: PageTransitionType.fade, child: TabsScreen()),
       );
     });
   }
@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             Icon(
               Icons.dining_rounded,
-              color: Colors.brown,
+              color: Colors.black,
               size: 110,
             ),
             SizedBox(height: 20),
@@ -43,12 +43,12 @@ class _SplashScreenState extends State<SplashScreen> {
               "Meals App",
               style: GoogleFonts.poppins(
                 fontSize: 24,
-                color: Colors.brown.shade600,
+                color: Colors.black45,
                 fontWeight: FontWeight.bold,
               ),
             ),
             SizedBox(height: 100),
-            LoadingAnimationWidget.fourRotatingDots(color: Colors.brown, size: 45),
+            LoadingAnimationWidget.fourRotatingDots(color: Colors.black, size: 45),
           ],
         ),
       ),
