@@ -12,34 +12,33 @@ class TodoListScreen extends StatefulWidget {
 }
 
 class _TodoListScreenState extends State<TodoListScreen> {
-
   List<TodoModel> _todos = [
-  TodoModel(
-    id: DateTime.now().toString(),
-    title: "Buy groceries",
-    description: "Milk, eggs, bread, fruits",
-  ),
-  TodoModel(
-    id: DateTime.now().add(const Duration(seconds: 1)).toString(),
-    title: "Workout",
-    description: "30 minutes morning exercise",
-  ),
-  TodoModel(
-    id: DateTime.now().add(const Duration(seconds: 2)).toString(),
-    title: "Study Flutter",
-    description: "Learn StatefulWidget lifecycle",
-  ),
-  TodoModel(
-    id: DateTime.now().add(const Duration(seconds: 3)).toString(),
-    title: "Office work",
-    description: "Complete assigned tasks",
-  ),
-  TodoModel(
-    id: DateTime.now().add(const Duration(seconds: 4)).toString(),
-    title: "Read book",
-    description: "Read 20 pages before sleep",
-  ),
-];
+    TodoModel(
+      id: DateTime.now().toString(),
+      title: "Buy groceries",
+      description: "Milk, eggs, bread, fruits",
+    ),
+    TodoModel(
+      id: DateTime.now().add(const Duration(seconds: 1)).toString(),
+      title: "Workout",
+      description: "30 minutes morning exercise",
+    ),
+    TodoModel(
+      id: DateTime.now().add(const Duration(seconds: 2)).toString(),
+      title: "Study Flutter",
+      description: "Learn StatefulWidget lifecycle",
+    ),
+    TodoModel(
+      id: DateTime.now().add(const Duration(seconds: 3)).toString(),
+      title: "Office work",
+      description: "Complete assigned tasks",
+    ),
+    TodoModel(
+      id: DateTime.now().add(const Duration(seconds: 4)).toString(),
+      title: "Read book",
+      description: "Read 20 pages before sleep",
+    ),
+  ];
 
   List<TodoModel> get _pendingTodos {
     return _todos.where((todo) => !todo.isCompleted).toList();
@@ -66,31 +65,28 @@ class _TodoListScreenState extends State<TodoListScreen> {
       _todos.removeWhere((todo) => todo.id == id);
     });
   }
-
   void _editTodo(TodoModel todo, String title, String description) {
     setState(() {
-      // FIX 
-      // final _todoIndex = _todos.indexWhere((element) => element.id == todo.id,);
-      _todos = _todos.map((t) {
-        if (t.id == todo.id) {
-          return t.copyWith(title: title, description: description);
-        }
-        return t;
-      }).toList();
+      final todoIndex = _todos.indexWhere((element) => element.id == todo.id);
+      if (todoIndex != -1) {
+        _todos[todoIndex] = _todos[todoIndex].copyWith(
+          title: title,
+          description: description,
+        );
+      }
+    });
+  }
+  void _toggleTodo(String id) {
+    setState(() {
+      final index = _todos.indexWhere((todo) => todo.id == id);
+      if (index != -1) {
+        _todos[index] = _todos[index].copyWith(
+          isCompleted: !_todos[index].isCompleted,
+        );
+      }
     });
   }
 
-  void _toggleTodo(String id) {
-    setState(() {
-      _todos = _todos.map((todo) {
-        if (todo.id == id) {
-          return todo.copyWith(isCompleted: !todo.isCompleted);
-        }
-        return todo;
-      }).toList();
-    });
-  }
-  
   void _showAddTodoDialog() {
     final titleController = TextEditingController();
     final descriptionController = TextEditingController();
@@ -172,10 +168,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
             color: Colors.indigo,
           ),
         ),
-        content: Text(
-          error,
-          style: GoogleFonts.poppins(),
-        ),
+        content: Text(error, style: GoogleFonts.poppins()),
         actions: [
           CustomButton(
             onPress: () => Navigator.pop(context),
@@ -247,7 +240,7 @@ class _TodoListScreenState extends State<TodoListScreen> {
                 );
                 Navigator.pop(context);
               } else {
-                 Navigator.pop(context);
+                Navigator.pop(context);
                 _emptyFieldDialog("Please add proper inputs and retry !");
               }
             },

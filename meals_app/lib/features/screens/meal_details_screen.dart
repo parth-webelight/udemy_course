@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:meals_app/features/data/favorites_provider.dart';
+import 'package:meals_app/features/providers/favorites_provider.dart';
 import 'package:meals_app/features/models/meal_model.dart';
 
 class MealDetailsScreen extends StatefulWidget {
@@ -73,10 +73,7 @@ class _MealDetailsScreenState extends State<MealDetailsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(
-          meal.title,
-          style: GoogleFonts.poppins(),
-        ),
+        title: Text(meal.title, style: GoogleFonts.poppins()),
         centerTitle: true,
         actions: [
           IconButton(
@@ -107,14 +104,16 @@ class _MealDetailsScreenState extends State<MealDetailsScreen> {
                 width: double.infinity,
                 height: 260,
                 fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Container(
+                  height: 260,
+                  color: Colors.grey.shade300,
+                  alignment: Alignment.center,
+                  child: const Icon(Icons.broken_image, size: 40),
+                ),
               ),
             ),
-            Container(
-              width: double.infinity,
+            Padding(
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.black,
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -128,25 +127,16 @@ class _MealDetailsScreenState extends State<MealDetailsScreen> {
                   ),
                   const SizedBox(height: 10),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      _buildBadge(
-                        '${meal.duration} mins',
-                        icon: Icons.schedule,
-                      ),
+                      _buildBadge('${meal.duration} mins', icon: Icons.schedule),
                       const SizedBox(width: 8),
-                      _buildBadge(
-                        complexityText,
-                        icon: Icons.work,
-                      ),
+                      _buildBadge(complexityText, icon: Icons.work),
                       const SizedBox(width: 8),
-                      _buildBadge(
-                        affordabilityText,
-                        icon: Icons.money,
-                      ),
+                      _buildBadge(affordabilityText, icon: Icons.money),
                     ],
                   ),
                   const SizedBox(height: 12),
+
                   Wrap(
                     spacing: 8,
                     runSpacing: 4,
@@ -155,93 +145,102 @@ class _MealDetailsScreenState extends State<MealDetailsScreen> {
                         _buildBadge('Gluten-free', icon: Icons.check_circle),
                       if (meal.isLactoseFree)
                         _buildBadge('Lactose-free', icon: Icons.check_circle),
-                      if (meal.isVegan)
-                        _buildBadge('Vegan', icon: Icons.eco),
+                      if (meal.isVegan) _buildBadge('Vegan', icon: Icons.eco),
                       if (meal.isVegetarian)
                         _buildBadge('Vegetarian', icon: Icons.spa),
                     ],
                   ),
+
                   const SizedBox(height: 24),
                   _buildSectionTitle('Ingredients'),
+
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white10,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 12,
-                      ),
-                      itemCount: meal.ingredients.length,
+                    child: ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      separatorBuilder: (_, _) =>
-                          const Divider(color: Colors.white12, height: 8),
-                      itemBuilder: (ctx, index) => Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            '• ',
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Expanded(
-                            child: Text(
-                              meal.ingredients[index],
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 13,
-                              ),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 12),
+                      itemCount: meal.ingredients.length,
+                      itemBuilder: (context, index) {
+                        return Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('• ',
+                                    style: TextStyle(color: Colors.white)),
+                                Expanded(
+                                  child: Text(
+                                    meal.ingredients[index],
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ),
+                            if (index != meal.ingredients.length - 1)
+                              const Divider(
+                                  color: Colors.white12, height: 8),
+                          ],
+                        );
+                      },
                     ),
                   ),
+
                   const SizedBox(height: 24),
                   _buildSectionTitle('Steps'),
-                  ListView.separated(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: meal.steps.length,
+
+                  ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    separatorBuilder: (_, _) =>
-                        const SizedBox(height: 8),
-                    itemBuilder: (ctx, index) => Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white10,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.orangeAccent,
-                            child: Text(
-                              '${index + 1}',
-                              style: GoogleFonts.poppins(
-                                color: Colors.black,
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
+                    itemCount: meal.steps.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white10,
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              meal.steps[index],
-                              style: GoogleFonts.poppins(
-                                color: Colors.white,
-                                fontSize: 13,
+                          padding: const EdgeInsets.all(10),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              CircleAvatar(
+                                radius: 12,
+                                backgroundColor: Colors.orangeAccent,
+                                child: Text(
+                                  '${index + 1}',
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.black,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                               ),
-                            ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  meal.steps[index],
+                                  style: GoogleFonts.poppins(
+                                    color: Colors.white,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
+
                   const SizedBox(height: 12),
                 ],
               ),

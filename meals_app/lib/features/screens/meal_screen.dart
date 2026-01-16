@@ -49,6 +49,7 @@ class MealScreen extends StatelessWidget {
                 elevation: 2,
                 child: InkWell(
                   onTap: () {
+                    
                     Navigator.push(
                       context,
                       PageTransition(
@@ -65,6 +66,18 @@ class MealScreen extends StatelessWidget {
                         fit: BoxFit.cover,
                         height: 200,
                         width: double.infinity,
+                        imageErrorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            height: 200,
+                            color: Colors.grey.shade300,
+                            alignment: Alignment.center,
+                            child: const Icon(
+                              Icons.broken_image,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
                       ),
                       Positioned(
                         bottom: 0,

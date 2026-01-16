@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:meals_app/features/data/dummy_data.dart';
-import 'package:meals_app/features/data/favorites_provider.dart';
+import 'package:meals_app/features/providers/favorites_provider.dart';
 import 'package:meals_app/features/models/meal_model.dart';
 import 'package:meals_app/features/screens/meal_details_screen.dart';
 import 'package:page_transition/page_transition.dart';
@@ -30,11 +30,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.favorite_border,
-                    size: 80,
-                    color: Colors.white24,
-                  ),
+                  Icon(Icons.favorite_border, size: 80, color: Colors.white24),
                   const SizedBox(height: 20),
                   Text(
                     "No favorites yet!",
@@ -64,16 +60,24 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 clipBehavior: Clip.hardEdge,
                 elevation: 2,
                 child: InkWell(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       PageTransition(
                         type: PageTransitionType.fade,
                         child: MealDetailsScreen(meal: favorites[index]),
                       ),
-                    ).then((_) {
-                      setState(() {});
-                    });
+                    );
+                    setState(() {});
+                    // Navigator.push(
+                    //   context,
+                    //   PageTransition(
+                    //     type: PageTransitionType.fade,
+                    //     child: MealDetailsScreen(meal: favorites[index]),
+                    //   ),
+                    // ).then((_) {
+                    //   setState(() {});
+                    // });
                   },
                   child: Stack(
                     children: [
@@ -129,8 +133,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    favorites[index].complexity.name[0].toUpperCase() +
-                                        favorites[index].complexity.name.substring(1),
+                                    favorites[index].complexity.name[0]
+                                            .toUpperCase() +
+                                        favorites[index].complexity.name
+                                            .substring(1),
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontSize: 10,
@@ -144,8 +150,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    favorites[index].affordability.name[0].toUpperCase() +
-                                        favorites[index].affordability.name.substring(1),
+                                    favorites[index].affordability.name[0]
+                                            .toUpperCase() +
+                                        favorites[index].affordability.name
+                                            .substring(1),
                                     style: GoogleFonts.poppins(
                                       color: Colors.white,
                                       fontSize: 10,
