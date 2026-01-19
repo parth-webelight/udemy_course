@@ -49,7 +49,6 @@ class MealScreen extends StatelessWidget {
                 elevation: 2,
                 child: InkWell(
                   onTap: () {
-                    
                     Navigator.push(
                       context,
                       PageTransition(
@@ -157,4 +156,4 @@ class MealScreen extends StatelessWidget {
             ),
     );
   }
-}
+}                                                                                                                                                             

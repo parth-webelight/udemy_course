@@ -1,6 +1,7 @@
 import 'package:meals_app/features/models/meal_model.dart';
 
 class FavoritesProvider {
+  
   // THIS LINE STAND'S PRIVATE VARIABLE IN THAT MEAN NOT ACCESS OUT SIDE THE CLASS.
   static final List<String> _favoriteMealIds = [];
 
@@ -25,10 +26,3 @@ class FavoritesProvider {
         .toList();
   }
 }
-
-
-
-// WIDGET METHOD
-// EVERY BUILD() CALL PAR METHOD CALL EVERY TIME NOT FOE HEAVY UI IT IS ONLY SMALL UI 
-// SCREEN REBUILD -- BADGE REBUILD / STATE CHANGE ANYWHERE -- BADGE REBUILD
-// CAN NOT USE CONST 
