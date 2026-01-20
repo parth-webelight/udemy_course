@@ -29,7 +29,6 @@ class _GroceryListState extends State<GroceryList> {
 
     try {
       final response = await FirebaseService.fetchGroceryItems();
-
       if (response.statusCode >= 400) {
         setState(() {
           _error = 'Failed to fetch data. Please try again later.';
@@ -37,7 +36,6 @@ class _GroceryListState extends State<GroceryList> {
         });
         return;
       }
-
       if (response.body == 'null') {
         setState(() {
           _groceryItems = [];
@@ -45,17 +43,14 @@ class _GroceryListState extends State<GroceryList> {
         });
         return;
       }
-
       final Map<String, dynamic> listData = json.decode(response.body);
       final List<GroceryItem> loadedItems = [];
-
       for (final item in listData.entries) {
         final category = categories.entries
             .firstWhere(
               (catItem) => catItem.value.title == item.value['category'],
             )
             .value;
-
         loadedItems.add(
           GroceryItem(
             id: item.key,
@@ -65,7 +60,6 @@ class _GroceryListState extends State<GroceryList> {
           ),
         );
       }
-
       setState(() {
         _groceryItems = loadedItems;
         _isLoading = false;
@@ -84,10 +78,10 @@ class _GroceryListState extends State<GroceryList> {
     _loadItems();
   }
 
-  void _addItem() async {
-    await Navigator.of(context).push<GroceryItem>(
-      MaterialPageRoute(builder: (context) => const NewItem()),
-    );
+  void _addItem() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (context) => const NewItem()));
     _loadItems();
   }
 

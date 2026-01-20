@@ -30,7 +30,6 @@ class _NewItemState extends State<NewItem> {
     setState(() {
       _isSending = true;
     });
-
     final response = await FirebaseService.addGroceryItem(
       name: _enteredName,
       quantity: _enteredQuantity,
@@ -95,7 +94,6 @@ class _NewItemState extends State<NewItem> {
             ),
             child: Column(
               children: [
-                /// Name Field
                 TextFormField(
                   maxLength: 50,
                   decoration: _inputDecoration(
@@ -104,7 +102,7 @@ class _NewItemState extends State<NewItem> {
                   ),
                   validator: (value) {
                     if (value == null ||
-                        value.isEmpty ||
+                        value.isEmpty || 
                         value.trim().length <= 1 ||
                         value.trim().length > 50) {
                       return 'Must be between 1 and 50 characters.';
@@ -114,9 +112,8 @@ class _NewItemState extends State<NewItem> {
                   onSaved: (newValue) => _enteredName = newValue!,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: 15),
 
-                /// Quantity & Category Row
                 TextFormField(
                   keyboardType: TextInputType.number,
                   initialValue: _enteredQuantity.toString(),
@@ -137,7 +134,7 @@ class _NewItemState extends State<NewItem> {
                       _enteredQuantity = int.parse(newValue!),
                 ),
                 
-                const SizedBox(height: 15),
+                const SizedBox(height: 25),
                 
                 DropdownButtonFormField(
                   value: _selectedCategory,
