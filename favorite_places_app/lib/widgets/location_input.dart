@@ -1,8 +1,9 @@
-// ignore_for_file: deprecated_member_use
-
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
+import 'package:permission_handler/permission_handler.dart' hide PermissionStatus;
 import 'package:favorite_places_app/models/place_model.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
+
 
 class LocationInput extends StatefulWidget {
   const LocationInput({super.key, required this.onSelectLocation});
@@ -15,16 +16,12 @@ class LocationInput extends StatefulWidget {
 
 class _LocationInputState extends State<LocationInput> {
   PlaceLocation? _pickedLocation;
-  var _isGettingLocation = false;
+  bool _isGettingLocation = false;
 
   void _getCurrentLocation() async {
-    Location location = Location();
+    final location = Location();
 
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
-
-    serviceEnabled = await location.serviceEnabled();
+    bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
       if (!serviceEnabled) {
@@ -32,24 +29,33 @@ class _LocationInputState extends State<LocationInput> {
       }
     }
 
-    permissionGranted = await location.hasPermission();
+    PermissionStatus permissionGranted = await location.hasPermission();
+
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
+    }
+
+    if (permissionGranted == PermissionStatus.deniedForever) {
+      _showPermissionDialog();
+      return;
+    }
+
+    if (permissionGranted != PermissionStatus.granted) {
+      return;
     }
 
     setState(() {
       _isGettingLocation = true;
     });
 
-    locationData = await location.getLocation();
-    
+    final locationData = await location.getLocation();
+
     final pickedLocation = PlaceLocation(
       latitude: locationData.latitude!,
       longitude: locationData.longitude!,
-      address: 'Lat: ${locationData.latitude!.toStringAsFixed(4)}, Lng: ${locationData.longitude!.toStringAsFixed(4)}',
+      address:
+          'Lat: ${locationData.latitude!.toStringAsFixed(4)}, '
+          'Lng: ${locationData.longitude!.toStringAsFixed(4)}',
     );
 
     setState(() {
@@ -58,6 +64,32 @@ class _LocationInputState extends State<LocationInput> {
     });
 
     widget.onSelectLocation(pickedLocation);
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Location Required'),
+        content: const Text(
+          'Location permission is compulsory. '
+          'Please enable it from app settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await openAppSettings();
+              Navigator.of(ctx).pop();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -125,10 +157,10 @@ class _LocationInputState extends State<LocationInput> {
           children: [
             TextButton.icon(
               onPressed: _getCurrentLocation,
-              label:  Text('Current Location',style: TextStyle(color : Colors.grey.shade700),),
-              icon:  Icon(Icons.location_on,color: Colors.grey.shade400,),
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.primary,
+              icon: Icon(Icons.location_on, color: Colors.grey.shade400),
+              label: Text(
+                'Current Location',
+                style: TextStyle(color: Colors.grey.shade700),
               ),
             ),
           ],

@@ -9,6 +9,7 @@ class PlacesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    debugPrint("BUILD PLACE SCREEN");
     final userPlaces = ref.watch(userPlacesProvider);
     
     return Scaffold(
@@ -51,6 +52,7 @@ class PlacesScreen extends ConsumerWidget {
               label: const Text('Add Your First Place',style: TextStyle(color: Colors.white),),
             )
           : FloatingActionButton(
+            backgroundColor: Colors.grey.shade600,
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -58,7 +60,7 @@ class PlacesScreen extends ConsumerWidget {
                   ),
                 );
               },
-              child: const Icon(Icons.add),
+              child: const Icon(Icons.add,  color: Colors.white),
             ),
     );
   }

@@ -1,5 +1,3 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:favorite_places_app/models/place_model.dart';
 import 'package:flutter/material.dart';
 
@@ -13,21 +11,18 @@ class PlacesDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(place.title),
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.grey.shade600,
         elevation: 0,
         foregroundColor: Colors.white,
       ),
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
-          Hero(
-            tag: place.id,
-            child: Image.file(
-              place.image,
-              fit: BoxFit.cover,
-              height: double.infinity,
-              width: double.infinity,
-            ),
+          Image.file(
+            place.image,
+            fit: BoxFit.cover,
+            height: double.infinity,
+            width: double.infinity,
           ),
           Positioned(
             bottom: 0,

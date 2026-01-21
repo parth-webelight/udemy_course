@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
 import 'package:favorite_places_app/models/place_model.dart';
 import 'package:favorite_places_app/providers/user_places.dart';
@@ -20,7 +22,9 @@ class _AddPlacesScreenState extends ConsumerState<AddPlacesScreen> {
 
   void _savePlace() async {
     final enteredText = _titleController.text;
-    if (enteredText.isEmpty || _selectedImage == null || _selectedLocation == null) {
+    if (enteredText.isEmpty ||
+        _selectedImage == null ||
+        _selectedLocation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please fill all fields: title, image, and location.'),
@@ -30,31 +34,22 @@ class _AddPlacesScreenState extends ConsumerState<AddPlacesScreen> {
       return;
     }
 
-    try {
-      await ref.read(userPlacesProvider.notifier).addPlace(
-        enteredText,
-        _selectedImage!,
-        _selectedLocation!,
+    final result = await ref
+        .read(userPlacesProvider.notifier)
+        .addPlace(enteredText, _selectedImage!, _selectedLocation!);
+
+    if (result == DBResult.success) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Place saved')));
+      Navigator.of(context).pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to save place'),
+          backgroundColor: Colors.red,
+        ),
       );
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Place added successfully!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.of(context).pop();
-      }
-    } catch (error) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to add place: $error'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -66,10 +61,11 @@ class _AddPlacesScreenState extends ConsumerState<AddPlacesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("BUILD ADD PLACE SCREEN");
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Place'),
-        backgroundColor:Colors.grey.shade600,
+        backgroundColor: Colors.grey.shade600,
         foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
@@ -106,7 +102,10 @@ class _AddPlacesScreenState extends ConsumerState<AddPlacesScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _savePlace,
                   icon: const Icon(Icons.add, color: Colors.white),
-                  label: const Text('Add Place',style: TextStyle(color: Colors.white),),
+                  label: const Text(
+                    'Add Place',
+                    style: TextStyle(color: Colors.white),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey.shade600,
                     padding: const EdgeInsets.symmetric(vertical: 16),

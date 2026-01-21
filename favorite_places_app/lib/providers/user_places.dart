@@ -8,40 +8,52 @@ class UserPlacesNotifier extends StateNotifier<List<PlaceModel>> {
     loadPlaces();
   }
 
-  Future<void> loadPlaces() async {
+  Future<DBResult> loadPlaces() async {
     final dataList = await DBHelper.getData('user_places');
-    final places = dataList.map((item) => PlaceModel.fromMap(item)).toList();
-    state = places;
+
+    if (dataList.isEmpty) {
+      state = [];
+      return DBResult.empty;
+    }
+
+    state = dataList.map((e) => PlaceModel.fromMap(e)).toList();
+    return DBResult.success;
   }
 
-  Future<void> addPlace(String title, File image, PlaceLocation location) async {
+  Future<DBResult> addPlace(
+    String title,
+    File image,
+    PlaceLocation location,
+  ) async {
     final newPlace = PlaceModel(
       title: title,
       image: image,
       location: location,
     );
-    
-    await DBHelper.insert('user_places', newPlace.toMap().cast<String, Object>());
-    state = [newPlace, ...state];
-  }
 
-  Future<void> removePlace(String id) async {
-    await DBHelper.delete('user_places', id);
-    state = state.where((place) => place.id != id).toList();
-  }
-
-  Future<void> updatePlace(String id, String title, File image, PlaceLocation location) async {
-    final updatedPlace = PlaceModel(
-      id: id,
-      title: title,
-      image: image,
-      location: location,
+    final result = await DBHelper.insert(
+      'user_places',
+      newPlace.toMap().cast<String, Object>(),
     );
-    
-    await DBHelper.update('user_places', id, updatedPlace.toMap().cast<String, Object>());
-    state = state.map((place) => place.id == id ? updatedPlace : place).toList();
+
+    if (result == DBResult.success) {
+      state = [newPlace, ...state];
+    }
+
+    return result;
+  }
+
+  Future<DBResult> removePlace(String id) async {
+    final result = await DBHelper.delete('user_places', id);
+
+    if (result == DBResult.success) {
+      state = state.where((place) => place.id != id).toList();
+    }
+
+    return result;
   }
 }
+
 
 final userPlacesProvider =
     StateNotifierProvider<UserPlacesNotifier, List<PlaceModel>>(

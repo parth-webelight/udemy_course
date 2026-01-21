@@ -68,3 +68,10 @@ class PlaceModel {
     );
   }
 }
+
+enum DBResult {
+  success,
+  failure,
+  notFound,
+  empty,
+}

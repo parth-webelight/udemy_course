@@ -1,4 +1,4 @@
-// ignore_for_file: deprecated_member_use
+// ignore_for_file: deprecated_member_use, use_build_context_synchronously
 
 import 'package:favorite_places_app/models/place_model.dart';
 import 'package:favorite_places_app/providers/user_places.dart';
@@ -18,11 +18,7 @@ class PlacesList extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.location_off,
-              size: 64,
-              color: Colors.grey.shade400,
-            ),
+            Icon(Icons.location_off, size: 64, color: Colors.grey.shade400),
             const SizedBox(height: 16),
             Text(
               'No Places Added Yet',
@@ -60,10 +56,7 @@ class PlacesList extends ConsumerWidget {
             ),
             title: Text(
               place.title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 4),
@@ -72,14 +65,16 @@ class PlacesList extends ConsumerWidget {
                   Icon(
                     Icons.location_on,
                     size: 16,
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Colors.grey.shade600,
                   ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       place.location.address,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.7),
                         fontSize: 12,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -95,16 +90,9 @@ class PlacesList extends ConsumerWidget {
                   value: 'delete',
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.delete,
-                        color: Colors.red[600],
-                        size: 20,
-                      ),
+                      Icon(Icons.delete, color: Colors.red[600], size: 20),
                       const SizedBox(width: 8),
-                      Text(
-                        'Delete',
-                        style: TextStyle(color: Colors.red[600]),
-                      ),
+                      Text('Delete', style: TextStyle(color: Colors.red[600])),
                     ],
                   ),
                 ),
@@ -128,7 +116,11 @@ class PlacesList extends ConsumerWidget {
     );
   }
 
-  void _showDeleteDialog(BuildContext context, WidgetRef ref, PlaceModel place) {
+  void _showDeleteDialog(
+    BuildContext context,
+    WidgetRef ref,
+    PlaceModel place,
+  ) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -141,28 +133,40 @@ class PlacesList extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () async {
+              final parentContext = context;
+
               Navigator.of(ctx).pop();
-              try {
-                await ref.read(userPlacesProvider.notifier).removePlace(place.id);
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${place.title} deleted successfully'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              } catch (error) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Failed to delete place: $error'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+
+              final result = await ref
+                  .read(userPlacesProvider.notifier)
+                  .removePlace(place.id);
+
+              if (!parentContext.mounted) return;
+
+              if (result == DBResult.success) {
+                ScaffoldMessenger.of(parentContext).showSnackBar(
+                  SnackBar(
+                    content: Text('${place.title} deleted successfully'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } else if (result == DBResult.notFound) {
+                ScaffoldMessenger.of(parentContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Place not found'),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(parentContext).showSnackBar(
+                  const SnackBar(
+                    content: Text('Failed to delete place'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
+
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
           ),
