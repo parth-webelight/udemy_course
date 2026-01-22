@@ -1,8 +1,8 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, deprecated_member_use
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:chat_app/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -11,76 +11,44 @@ class AuthScreen extends StatefulWidget {
   State<AuthScreen> createState() => _AuthScreenState();
 }
 
-final _firebase = FirebaseAuth.instance;
-
 class _AuthScreenState extends State<AuthScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController();
 
-  String _email = '';
-  String _password = '';
-  String _userName = '';
-  bool _isLogin = true;
-  bool _isLoading = false;
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _usernameController.dispose();
+    super.dispose();
+  }
 
-  void _submit() async {
+  void _submit(WidgetRef ref) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
     
-    setState(() {
-      _isLoading = true;
-    });
+    final authNotifier = ref.read(authStateProvider.notifier);
     
-    _formKey.currentState!.save();
-    debugPrint('Email: $_email');
-    debugPrint('Password: $_password');
-    debugPrint(_isLogin ? 'Logging in...' : 'Creating account...');
+    authNotifier.updateEmail(_emailController.text);
+    authNotifier.updatePassword(_passwordController.text);
+    if (!ref.read(authStateProvider).isLogin) {
+      authNotifier.updateUserName(_usernameController.text);
+    }
     
-    try {
-      UserCredential userCredential;
-      if (_isLogin) {
-        userCredential = await _firebase.signInWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-      } else {
-        userCredential = await _firebase.createUserWithEmailAndPassword(
-          email: _email,
-          password: _password,
-        );
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-              'username' : _userName,
-              'email' :_email,
-
-            });
-      }
-
-      debugPrint(userCredential.toString());
-    } on FirebaseAuthException catch (e) {
+    final error = await authNotifier.submit();
+    if (error != null && mounted) {
       ScaffoldMessenger.of(context)
         ..clearSnackBars()
         ..showSnackBar(
           SnackBar(
-            content: Text(e.message ?? 'Authentication failed.'),
+            content: Text(error),
             backgroundColor: Colors.red,
           ),
         );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
-  }
-
-  void _toggleMode() {
-    setState(() {
-      _isLogin = !_isLogin;
-    });
   }
 
   @override
@@ -115,7 +83,6 @@ class _AuthScreenState extends State<AuthScreen> {
                 children: [
                   SizedBox(height: screenHeight * 0.05),
                   
-                  // Logo Section
                   Container(
                     width: screenWidth * 0.4,
                     height: screenWidth * 0.4,
@@ -124,7 +91,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -139,31 +106,41 @@ class _AuthScreenState extends State<AuthScreen> {
                   
                   SizedBox(height: screenHeight * 0.03),
                   
-                  // Welcome Text
-                  Text(
-                    _isLogin ? 'Welcome Back!' : 'Create Account',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.07,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final authState = ref.watch(authStateProvider);
+                      
+                      return Text(
+                        authState.isLogin ? 'Welcome Back!' : 'Create Account',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.07,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      );
+                    },
                   ),
                   
                   SizedBox(height: screenHeight * 0.01),
                   
-                  Text(
-                    _isLogin 
-                        ? 'Sign in to continue chatting' 
-                        : 'Join our chat community',
-                    style: TextStyle(
-                      fontSize: screenWidth * 0.04,
-                      color: Colors.white.withOpacity(0.8),
-                    ),
+                  Consumer(
+                    builder: (context, ref, child) {
+                      final authState = ref.watch(authStateProvider);
+                      
+                      return Text(
+                        authState.isLogin 
+                            ? 'Sign in to continue chatting' 
+                            : 'Join our chat community',
+                        style: TextStyle(
+                          fontSize: screenWidth * 0.04,
+                          color: Colors.white.withValues(alpha: 0.8),
+                        ),
+                      );
+                    },
                   ),
                   
                   SizedBox(height: screenHeight * 0.04),
                   
-                  // Form Card
                   Container(
                     width: double.infinity,
                     constraints: BoxConstraints(
@@ -174,7 +151,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -182,153 +159,170 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                     child: Padding(
                       padding: EdgeInsets.all(screenWidth * 0.06),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          children: [
-                            if (!_isLogin) ...[
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Username',
-                                  prefixIcon: const Icon(Icons.person_outline),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
-                                enableSuggestions: false,
-                                validator: (value) {
-                                  if(value == null || value.isEmpty || value.trim().length < 4) {
-                                    return 'Please enter at least 4 characters.';
-                                  }
-                                  return null;
-                                },
-                                onSaved: (value) {
-                                  _userName = value!;
-                                },
-                              ),
-                              SizedBox(height: screenHeight * 0.02),
-                            ],
-                            
-                            TextFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Email Address',
-                                prefixIcon: const Icon(Icons.email_outlined),
-                                filled: true,
-                                fillColor: Colors.grey[50],
-                              ),
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Enter email';
-                                }
-                                return null;
-                              },
-                              onSaved: (value) {
-                                _email = value!;
-                              },
-                            ),
-                            
-                            SizedBox(height: screenHeight * 0.02),
-                            
-                            TextFormField(
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                prefixIcon: const Icon(Icons.lock_outline),
-                                filled: true,
-                                fillColor: Colors.grey[50],
-                              ),
-                              obscureText: true,
-                              validator: (value) {
-                                if (value == null || value.length < 6) {
-                                  return 'Password must be 6+ chars';
-                                }
-                                return null;
-                              },
-                              onSaved: (value) {
-                                _password = value!;
-                              },
-                            ),
-                            
-                            SizedBox(height: screenHeight * 0.03),
-                            
-                            SizedBox(
-                              width: double.infinity,
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: _isLoading ? null : _submit,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _isLoading 
-                                      ? Colors.grey[300] 
-                                      : const Color(0xFF6C63FF),
-                                  foregroundColor: _isLoading 
-                                      ? Colors.grey[600] 
-                                      : Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
+                      child: Consumer(
+                        builder: (context, ref, child) {
+                          final authState = ref.watch(authStateProvider);
+                          
+                          return Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                if (!authState.isLogin) ...[
+                                  TextFormField(
+                                    controller: _usernameController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Username',
+                                      prefixIcon: const Icon(Icons.person_outline),
+                                      filled: true,
+                                      fillColor: Colors.grey[50],
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide.none,
+                                      ),
+                                    ),
+                                    enableSuggestions: false,
+                                    validator: (value) {
+                                      if(value == null || value.isEmpty || value.trim().length < 4) {
+                                        return 'Please enter at least 4 characters.';
+                                      }
+                                      return null;
+                                    },
                                   ),
+                                  SizedBox(height: screenHeight * 0.02),
+                                ],
+                                
+                                TextFormField(
+                                  controller: _emailController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Email Address',
+                                    prefixIcon: const Icon(Icons.email_outlined),
+                                    filled: true,
+                                    fillColor: Colors.grey[50],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Enter email';
+                                    }
+                                    return null;
+                                  },
                                 ),
-                                child: _isLoading
-                                    ? Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          SizedBox(
-                                            width: 20,
-                                            height: 20,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                              valueColor: AlwaysStoppedAnimation<Color>(
-                                                Colors.grey[600]!,
+                                
+                                SizedBox(height: screenHeight * 0.02),
+                                
+                                TextFormField(
+                                  controller: _passwordController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Password',
+                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    filled: true,
+                                    fillColor: Colors.grey[50],
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  obscureText: true,
+                                  validator: (value) {
+                                    if (value == null || value.length < 6) {
+                                      return 'Password must be 6+ chars';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                
+                                SizedBox(height: screenHeight * 0.03),
+                                
+                                SizedBox(
+                                  width: double.infinity,
+                                  height: 50,
+                                  child: ElevatedButton(
+                                    onPressed: authState.isLoading ? null : () => _submit(ref),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: authState.isLoading 
+                                          ? Colors.grey[300] 
+                                          : const Color(0xFF6C63FF),
+                                      foregroundColor: authState.isLoading 
+                                          ? Colors.grey[600] 
+                                          : Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(25),
+                                      ),
+                                    ),
+                                    child: authState.isLoading
+                                        ? Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                                    Colors.grey[600]!,
+                                                  ),
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 12),
-                                          Text(
-                                            _isLogin ? 'Signing in...' : 'Creating account...',
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                authState.isLogin ? 'Signing in...' : 'Creating account...',
+                                                style: TextStyle(
+                                                  fontSize: screenWidth * 0.04,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Text(
+                                            authState.isLogin ? 'Login' : 'Create Account',
                                             style: TextStyle(
-                                              fontSize: screenWidth * 0.04,
+                                              fontSize: screenWidth * 0.045,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
-                                        ],
-                                      )
-                                    : Text(
-                                        _isLogin ? 'Login' : 'Create Account',
-                                        style: TextStyle(
-                                          fontSize: screenWidth * 0.045,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            
-                            SizedBox(height: screenHeight * 0.02),
-                            
-                            TextButton(
-                              onPressed: _isLoading ? null : _toggleMode,
-                              child: RichText(
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    fontSize: screenWidth * 0.035,
-                                    color: _isLoading ? Colors.grey[400] : Colors.grey[600],
                                   ),
-                                  children: [
-                                    TextSpan(
-                                      text: _isLogin
-                                          ? "Don't have an account? "
-                                          : 'Already have an account? ',
-                                    ),
-                                    TextSpan(
-                                      text: _isLogin ? 'Sign Up' : 'Login',
-                                      style: TextStyle(
-                                        color: _isLoading ? Colors.grey[400] : const Color(0xFF6C63FF),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ],
                                 ),
-                              ),
+                                
+                                SizedBox(height: screenHeight * 0.02),
+                                
+                                TextButton(
+                                  onPressed: authState.isLoading ? null : () {
+                                    _emailController.clear();
+                                    _passwordController.clear();
+                                    _usernameController.clear();
+                                    ref.read(authStateProvider.notifier).toggleMode();
+                                  },
+                                  child: RichText(
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontSize: screenWidth * 0.035,
+                                        color: authState.isLoading ? Colors.grey[400] : Colors.grey[600],
+                                      ),
+                                      children: [
+                                        TextSpan(
+                                          text: authState.isLogin
+                                              ? "Don't have an account? "
+                                              : 'Already have an account? ',
+                                        ),
+                                        TextSpan(
+                                          text: authState.isLogin ? 'Sign Up' : 'Login',
+                                          style: TextStyle(
+                                            color: authState.isLoading ? Colors.grey[400] : const Color(0xFF6C63FF),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       ),
                     ),
                   ),

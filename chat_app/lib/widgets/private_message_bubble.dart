@@ -1,33 +1,39 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: deprecated_member_use
 
-// A MessageBubble for showing a single chat message on the ChatScreen.
-class MessageBubble extends StatelessWidget {
-  // First message in a sequence
-  const MessageBubble.first({
+import 'package:chat_app/model/private_message_model.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
+class PrivateMessageBubble extends StatelessWidget {
+  const PrivateMessageBubble.first({
     super.key,
-    required this.username,
     required this.message,
     required this.isMe,
   }) : isFirstInSequence = true;
 
-  // Next message in the same sequence
-  const MessageBubble.next({
+  const PrivateMessageBubble.next({
     super.key,
     required this.message,
     required this.isMe,
-  })  : isFirstInSequence = false,
-        username = null;
+  }) : isFirstInSequence = false;
 
-  // Whether this message starts a new sequence
   final bool isFirstInSequence;
-
-  // Username (shown only for first message in sequence)
-  final String? username;
-
-  final String message;
-
-  // Whether the message is from the logged-in user
+  final PrivateMessageModel message;
   final bool isMe;
+
+  String _formatTime(DateTime dateTime) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final messageDate = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    
+    if (messageDate == today) {
+      return DateFormat('hh:mm').format(dateTime);
+    } else if (messageDate == today.subtract(const Duration(days: 1))) {
+      return 'Yesterday ${DateFormat('hh:mm').format(dateTime)}';
+    } else {
+      return DateFormat('MMM dd, HH:mm').format(dateTime);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +52,9 @@ class MessageBubble extends StatelessWidget {
           if (!isMe && isFirstInSequence) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.1),
               child: Text(
-                username?.substring(0, 1).toUpperCase() ?? 'U',
+                message.senderUsername.substring(0, 1).toUpperCase(),
                 style: TextStyle(
                   color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
@@ -66,20 +72,17 @@ class MessageBubble extends StatelessWidget {
               crossAxisAlignment:
                   isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
               children: [
-                // Space before first message in sequence
                 if (isFirstInSequence) const SizedBox(height: 8),
-
-                // Username (only once per sequence)
-                if (username != null && !isMe)
+                if (!isMe && isFirstInSequence)
                   Container(
                     margin: const EdgeInsets.only(left: 12, bottom: 4),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      username!,
+                      message.senderUsername,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: theme.colorScheme.primary,
@@ -88,7 +91,6 @@ class MessageBubble extends StatelessWidget {
                     ),
                   ),
 
-                // Message bubble
                 Container(
                   constraints: BoxConstraints(
                     maxWidth: screenWidth * 0.75,
@@ -103,7 +105,7 @@ class MessageBubble extends StatelessWidget {
                         ? LinearGradient(
                             colors: [
                               theme.colorScheme.primary,
-                              theme.colorScheme.primary.withOpacity(0.8),
+                              theme.colorScheme.primary.withValues(alpha: 0.8),
                             ],
                           )
                         : LinearGradient(
@@ -124,23 +126,39 @@ class MessageBubble extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 5,
                         offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: Text(
-                    message,
-                    softWrap: true,
-                    style: TextStyle(
-                      height: 1.4,
-                      fontSize: screenWidth * 0.04,
-                      color: isMe
-                          ? Colors.white
-                          : Colors.black87,
-                      fontWeight: FontWeight.w400,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        message.text,
+                        softWrap: true,
+                        style: TextStyle(
+                          height: 1.4,
+                          fontSize: screenWidth * 0.04,
+                          color: isMe ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      if (message.createdAt != null) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          _formatTime(message.createdAt!.toDate()),
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.025,
+                            color: isMe 
+                                ? Colors.white.withValues(alpha: 0.7) 
+                                : Colors.grey[600],
+                            fontWeight: FontWeight.w300,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ],
