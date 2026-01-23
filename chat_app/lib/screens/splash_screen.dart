@@ -1,65 +1,66 @@
-import 'package:flutter/material.dart';
+// ignore_for_file: use_build_context_synchronously
 
-class SplashScreen extends StatelessWidget {
+import 'package:chat_app/screens/auth_screen.dart';
+import 'package:chat_app/screens/home_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(Duration(seconds: 3), () {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AuthScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final screenWidth = screenSize.width;
-    
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF6C63FF),
-              Color(0xFF9C88FF),
-              Color(0xFFE8E4FF),
-            ],
-          ),
-        ),
+      backgroundColor: Colors.white,
+      body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: screenWidth * 0.4,
-              height: screenWidth * 0.4,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.all(20),
-              child: Image.asset(
-                "assets/images/Chat.png",
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(height: 30),
-            const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              strokeWidth: 3,
-            ),
-            const SizedBox(height: 20),
+            Icon(Icons.chat, color: Colors.teal, size: 100),
+            SizedBox(height: 24),
             Text(
-              'Loading...',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: screenWidth * 0.045,
-                fontWeight: FontWeight.w500,
+              "Welcome to Chat App",
+              style: GoogleFonts.poppins(
+                fontSize: 25,
+                color: Colors.teal,
+                fontWeight: FontWeight.bold,
               ),
             ),
+            Text(
+              "One to One Communication",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.teal,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            SizedBox(height: 50),
+            CircularProgressIndicator(color: Colors.teal),
           ],
         ),
       ),

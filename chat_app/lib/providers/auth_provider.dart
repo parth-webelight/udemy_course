@@ -1,96 +1,105 @@
-import 'package:chat_app/model/auth_state_model.dart';
+import 'package:chat_app/models/auth_state_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter/material.dart';
 
-final authStateProvider = NotifierProvider<AuthNotifier, AuthStateModel>(() {
-  return AuthNotifier();
-});
 
-final currentUserProvider = StreamProvider<User?>((ref) {
-  return FirebaseAuth.instance.authStateChanges();
-});
 
-class AuthNotifier extends Notifier<AuthStateModel> {
-  final _firebase = FirebaseAuth.instance;
+final authProvider = StateNotifierProvider<AuthProvider, AuthStateModel>(
+  (ref) => AuthProvider(),
+);
 
-  @override
-  AuthStateModel build() {
-    return const AuthStateModel();
+class AuthProvider extends StateNotifier<AuthStateModel> {
+  AuthProvider()
+      : super(
+          AuthStateModel(
+            userName: "",
+            email: "",
+            phoneNumber: "",
+            password: "",
+            isLoading: false,
+            isLogin: false,
+          ),
+        );
+
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  void updateUserName(String value) {
+    state = state.copyWith(userName: value);
   }
 
-  void updateEmail(String email) {
-    state = state.copyWith(email: email);
+  void updateEmail(String value) {
+    state = state.copyWith(email: value);
   }
 
-  void updatePassword(String password) {
-    state = state.copyWith(password: password);
+  void updatePhoneNumber(String value) {
+    state = state.copyWith(phoneNumber: value);
   }
 
-  void updateUserName(String userName) {
-    state = state.copyWith(userName: userName);
+  void updatePassword(String value) {
+    state = state.copyWith(password: value);
   }
 
-  void toggleMode() {
+  void updateLoginState() {
     state = state.copyWith(isLogin: !state.isLogin);
   }
 
   Future<String?> submit() async {
     state = state.copyWith(isLoading: true);
-    
+
     try {
-      UserCredential userCredential;
       if (state.isLogin) {
-        userCredential = await _firebase.signInWithEmailAndPassword(
+        await _firebaseAuth.signInWithEmailAndPassword(
           email: state.email,
           password: state.password,
         );
       } else {
-        userCredential = await _firebase.createUserWithEmailAndPassword(
+        final userCredential =
+            await _firebaseAuth.createUserWithEmailAndPassword(
           email: state.email,
           password: state.password,
         );
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(userCredential.user!.uid)
-            .set({
-              'username': state.userName,
-              'email': state.email,
-            });
+        final user = userCredential.user;
+        if (user != null) {
+          await _firestore.collection('users').doc(user.uid).set({
+            'uid': user.uid,
+            'userName': state.userName,
+            'email': state.email,
+            'phoneNumber': state.phoneNumber,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
       }
-      state = state.copyWith(isLoading: false);
-      return null; 
+
+      return null;
     } on FirebaseAuthException catch (e) {
+      debugPrint(e.code);
+      return _mapError(e.code);
+    } finally {
       state = state.copyWith(isLoading: false);
-      return e.message ?? 'Authentication failed.';
     }
   }
 
-  Future<void> signOut() async {
-    await _firebase.signOut();
+  Future<void> logout() async {
+    _firebaseAuth.signOut();
+  }
+
+  String _mapError(String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return 'Email already in use';
+      case 'invalid-email':
+        return 'Invalid email';
+      case 'weak-password':
+        return 'Weak password';
+      case 'user-not-found':
+        return 'User not found';
+      case 'wrong-password':
+        return 'Wrong password';
+      default:
+        return 'Authentication failed';
+    }
   }
 }
-
-
-// final userDataProvider = FutureProvider.family<UserModel?, String>((ref, uid) async {
-//   if (uid.isEmpty) return null;
-  
-//   try {
-//     final userDoc = await FirebaseFirestore.instance
-//         .collection('users')
-//         .doc(uid)
-//         .get();
-    
-//     if (userDoc.exists) {
-//       final data = userDoc.data()!;
-//       return UserModel.fromMap({
-//         'uid': uid,
-//         'username': data['username'],
-//         'email': data['email'],
-//       });
-//     }
-//   } catch (e) {
-//     debugPrint('Error loading user data: $e');
-//   }
-//   return null;
-// });
