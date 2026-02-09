@@ -1,45 +1,15 @@
 // ignore_for_file: avoid_print
 
 import 'package:chat_app/models/chat_message_model.dart';
-import 'package:chat_app/models/chat_room_model.dart';
 import 'package:chat_app/models/chat_state_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 final chatProvider =
     StateNotifierProvider.family<ChatProvider, ChatStateModel, String>(
       (ref, receiverId) => ChatProvider(receiverId),
-    );
-    
-final userNameProvider = FutureProvider.family<String, String>((
-  ref,
-  uid,
-) async {
-  final doc = await FirebaseFirestore.instance
-      .collection("users")
-      .doc(uid)
-      .get();
-
-  if (!doc.exists) return "Unknown User";
-
-  return doc.data()!["name"] ?? "Unknown User";
-});
-final chatListProvider = StreamProvider<List<ChatRoom>>((ref) {
-  final uid = FirebaseAuth.instance.currentUser!.uid;
-
-  return FirebaseFirestore.instance
-      .collection("chatRooms")
-      .where("participants", arrayContains: uid)
-      .orderBy("lastMessageTime", descending: true)
-      .snapshots()
-      .map((snapshot) {
-        return snapshot.docs
-            .map((doc) => ChatRoom.fromMap(doc.id, doc.data()))
-            .toList();
-      });
-});
+    );   
 
 class ChatProvider extends StateNotifier<ChatStateModel> {
   final String receiverId;
