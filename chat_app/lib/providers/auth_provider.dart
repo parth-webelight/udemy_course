@@ -1,27 +1,32 @@
 import 'package:chat_app/models/auth_state_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:flutter/material.dart';
 
+final authProvider =
+    StateNotifierProvider.autoDispose<AuthProvider, AuthStateModel>(
+      (ref) => AuthProvider(),
+    );
 
-
-final authProvider = StateNotifierProvider<AuthProvider, AuthStateModel>(
-  (ref) => AuthProvider(),
-);
+final currentUserIdProvider = Provider<String?>((ref) {
+  return FirebaseAuth.instance.currentUser?.uid;
+});
 
 class AuthProvider extends StateNotifier<AuthStateModel> {
   AuthProvider()
-      : super(
-          AuthStateModel(
-            userName: "",
-            email: "",
-            phoneNumber: "",
-            password: "",
-            isLoading: false,
-            isLogin: false,
-          ),
-        );
+    : super(
+        AuthStateModel(
+          userName: "",
+          email: "",
+          phoneNumber: "",
+          password: "",
+          isLoading: false,
+          isLogin: true,
+          isFieldActive: true,
+        ),
+      );
 
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -46,6 +51,10 @@ class AuthProvider extends StateNotifier<AuthStateModel> {
     state = state.copyWith(isLogin: !state.isLogin);
   }
 
+  void updateFieldActive() {
+    state = state.copyWith(isFieldActive: !state.isFieldActive);
+  }
+
   Future<String?> submit() async {
     state = state.copyWith(isLoading: true);
 
@@ -56,11 +65,11 @@ class AuthProvider extends StateNotifier<AuthStateModel> {
           password: state.password,
         );
       } else {
-        final userCredential =
-            await _firebaseAuth.createUserWithEmailAndPassword(
-          email: state.email,
-          password: state.password,
-        );
+        final userCredential = await _firebaseAuth
+            .createUserWithEmailAndPassword(
+              email: state.email,
+              password: state.password,
+            );
         final user = userCredential.user;
         if (user != null) {
           await _firestore.collection('users').doc(user.uid).set({

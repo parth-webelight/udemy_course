@@ -21,6 +21,15 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _phoneNumberController = TextEditingController();
 
+  @override
+  void dispose() {
+    _userNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _phoneNumberController.dispose();
+    super.dispose();
+  }
+
   InputDecoration _inputDecoration({
     required String label,
     required IconData icon,
@@ -81,11 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     children: [
                       if (!state.isLogin)
                         TextFormField(
-                          onChanged: (value) {
-                            ref
-                                .read(authProvider.notifier)
-                                .updateUserName(value);
-                          },
+                          enabled: state.isFieldActive,
                           controller: _userNameController,
                           keyboardType: TextInputType.name,
                           textInputAction: TextInputAction.next,
@@ -106,9 +111,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       if (!state.isLogin) const SizedBox(height: 16),
                       TextFormField(
-                        onChanged: (value) {
-                          ref.read(authProvider.notifier).updateEmail(value);
-                        },
+                        enabled: state.isFieldActive,
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
@@ -131,11 +134,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       if (!state.isLogin) const SizedBox(height: 16),
                       if (!state.isLogin)
                         TextFormField(
-                          onChanged: (value) {
-                            ref
-                                .read(authProvider.notifier)
-                                .updatePhoneNumber(value);
-                          },
+                          enabled: state.isFieldActive,
                           controller: _phoneNumberController,
                           keyboardType: TextInputType.phone,
                           textInputAction: TextInputAction.next,
@@ -154,9 +153,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        onChanged: (value) {
-                          ref.read(authProvider.notifier).updatePassword(value);
-                        },
+                        enabled: state.isFieldActive,
                         controller: _passwordController,
                         keyboardType: TextInputType.visiblePassword,
                         textInputAction: TextInputAction.next,
@@ -181,6 +178,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         TextFormField(
                           keyboardType: TextInputType.visiblePassword,
                           textInputAction: TextInputAction.done,
+                          enabled: state.isFieldActive,
                           cursorColor: Colors.teal,
                           obscureText: true,
                           decoration: _inputDecoration(
@@ -213,11 +211,17 @@ class _AuthScreenState extends State<AuthScreen> {
                               : () async {
                                   if (!_formKey.currentState!.validate())
                                     return;
-
+                                
+                                  FocusScope.of(context).unfocus();
+                                  final auth = ref.read(authProvider.notifier);
+                                  auth.updateFieldActive();
+                                  auth.updateUserName(_userNameController.text);
+                                  auth.updateEmail(_emailController.text);
+                                  auth.updatePhoneNumber(_phoneNumberController.text);
+                                  auth.updatePassword(_passwordController.text);
                                   final response = await ref
                                       .read(authProvider.notifier)
                                       .submit();
-
                                   if (response != null) {
                                     Fluttertoast.showToast(msg: response);
                                   } else {
@@ -226,7 +230,11 @@ class _AuthScreenState extends State<AuthScreen> {
                                           ? "Login Successful"
                                           : "Signup Successful",
                                     );
-                                    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => HomeScreen()));
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) => HomeScreen(),
+                                      ),
+                                    );
                                   }
                                 },
                           child: state.isLoading
@@ -236,7 +244,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                                      Colors.teal,
                                     ),
                                   ),
                                 )
@@ -262,9 +270,11 @@ class _AuthScreenState extends State<AuthScreen> {
                           ),
                           const SizedBox(width: 5),
                           InkWell(
-                            onTap: () => ref
-                                .read(authProvider.notifier)
-                                .updateLoginState(),
+                            onTap: () {
+                              ref
+                                  .read(authProvider.notifier)
+                                  .updateLoginState();
+                            },
                             child: Text(
                               state.isLogin ? "SignUp" : "Login",
                               style: GoogleFonts.poppins(
