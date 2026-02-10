@@ -211,14 +211,26 @@ class _AuthScreenState extends State<AuthScreen> {
                               : () async {
                                   if (!_formKey.currentState!.validate())
                                     return;
-                                
+
                                   FocusScope.of(context).unfocus();
                                   final auth = ref.read(authProvider.notifier);
                                   auth.updateFieldActive();
                                   auth.updateUserName(_userNameController.text);
+                                  debugPrint(
+                                    "USERNAME: ${_userNameController.text}",
+                                  );
                                   auth.updateEmail(_emailController.text);
-                                  auth.updatePhoneNumber(_phoneNumberController.text);
+                                  debugPrint("EMAIL: ${_emailController.text}");
+                                  auth.updatePhoneNumber(
+                                    _phoneNumberController.text,
+                                  );
+                                  debugPrint(
+                                    "PHONE NUMBER: ${_phoneNumberController.text}",
+                                  );
                                   auth.updatePassword(_passwordController.text);
+                                  debugPrint(
+                                    "PASSWORD: ${_passwordController.text}",
+                                  );
                                   final response = await ref
                                       .read(authProvider.notifier)
                                       .submit();
@@ -243,9 +255,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                   height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.5,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.teal,
-                                    ),
+                                    color: Colors.teal,
                                   ),
                                 )
                               : Text(

@@ -23,10 +23,10 @@ class UserListScreen extends StatelessWidget {
       ),
       body: Consumer(
         builder: (context, ref, _) {
-          final usersAsync = ref.watch(allUsersProvider);
+          final usersList = ref.watch(allUsersProvider);
           final currentUid = ref.watch(currentUserIdProvider);
 
-          return usersAsync.when(
+          return usersList.when(
             loading: () => const Center(
               child: CircularProgressIndicator(color: Colors.teal),
             ),
@@ -35,7 +35,7 @@ class UserListScreen extends StatelessWidget {
             ),
             data: (users) {
               final filteredUsers = users
-                  .where((u) => u.uid != currentUid)
+                  .where((user) => user.uid != currentUid)
                   .toList();
               if (filteredUsers.isEmpty) {
                 return Center(

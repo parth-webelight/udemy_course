@@ -1,9 +1,9 @@
 import 'package:chat_app/models/auth_state_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:flutter/material.dart';
 
 final authProvider =
     StateNotifierProvider.autoDispose<AuthProvider, AuthStateModel>(
@@ -81,13 +81,13 @@ class AuthProvider extends StateNotifier<AuthStateModel> {
           });
         }
       }
-
+      
       return null;
     } on FirebaseAuthException catch (e) {
-      debugPrint(e.code);
+      debugPrint("Error code: ${e.code}");
       return _mapError(e.code);
     } finally {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, isFieldActive: true);
     }
   }
 
@@ -95,18 +95,29 @@ class AuthProvider extends StateNotifier<AuthStateModel> {
     _firebaseAuth.signOut();
   }
 
+  // USE AI
   String _mapError(String code) {
     switch (code) {
       case 'email-already-in-use':
+      case 'error_email_already_in_use':
         return 'Email already in use';
+
       case 'invalid-email':
+      case 'error_invalid_email':
         return 'Invalid email';
+
       case 'weak-password':
+      case 'error_weak_password':
         return 'Weak password';
+
       case 'user-not-found':
+      case 'error_user_not_found':
         return 'User not found';
+
       case 'wrong-password':
+      case 'error_wrong_password':
         return 'Wrong password';
+
       default:
         return 'Authentication failed';
     }
